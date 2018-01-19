@@ -13,8 +13,7 @@ use Bitrix\Currency\CurrencyRateTable;
 use Bitrix\Main\Loader;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Type\Date;
-use \Bitrix\Main\Application;
-use  \Bitrix\Currency\CurrencyTable;
+use Bitrix\Currency\CurrencyTable;
 /**
  * Class CurrencyRate
  *
