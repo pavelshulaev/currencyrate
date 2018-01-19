@@ -13,7 +13,7 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Type\Date;
 use \Bitrix\Main\Application;
-use Bitrix\Currency;
+use  \Bitrix\Currency\CurrencyTable;
 /**
  * Class CurrencyRate
  *
@@ -31,11 +31,16 @@ class CurrencyRate
      */
     public static function updateAll(Date $date = null)
     {
-        $currencies     = \CCurrency::GetList();
-        $baseCurrency   = Currency\CurrencyManager::getBaseCurrency();
+        $query = array(
+            'select'    => array('CURRENCY'),
+            'filter'    => array('BASE' => 'N'),
+            'cache'     => array('ttl' => 3600)
+        );
+
+        $currencies = CurrencyTable::getList($query);
+
         while ($currency = $currencies->Fetch())
-            if ($currency['CURRENCY'] != $baseCurrency)
-                self::update($currency['CURRENCY'], $date);
+            self::update($currency['CURRENCY'], $date);
     }
 
     /**
