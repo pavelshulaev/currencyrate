@@ -9,6 +9,7 @@
  */
 namespace Rover\CurrencyRate;
 
+use Bitrix\Currency\CurrencyRateTable;
 use Bitrix\Main\Loader;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Type\Date;
@@ -76,10 +77,7 @@ class CurrencyRate
         $newRateId = \CCurrencyRates::Add($newRateData);
 
         if ($newRateId) {
-            // clear cache
-            $cacheId    = md5($currency . $date->format('d.m.Y'));
-            $cache      = Application::getInstance()->getManagedCache();
-            $cache->clean($cacheId);
+            CurrencyRateTable::getEntity()->cleanCache();
 
             return $newRateId;
         }
@@ -90,35 +88,21 @@ class CurrencyRate
     /**
      * @param      $currency
      * @param Date $date
-     * @return mixed
-     * @throws \Bitrix\Main\SystemException
+     * @return array|null
      * @author Pavel Shulaev (https://rover-it.me)
      */
     public static function getOnDate($currency, Date $date)
     {
-        $cacheId    = md5($currency . $date->format('d.m.Y'));
-        $cache      = Application::getInstance()->getManagedCache();
+        $query = array(
+            'filter' => array(
+                '=CURRENCY' => $currency,
+                '=DATE_RATE'=> $date
+            ),
+            'order' => array('DATE_RATE' => 'desc'),
+            'cache' => array('ttl' => 3600)
+        );
 
-        if ($cache->read(3600, $cacheId)) {
-            $vars = $cache->get($cacheId); // достаем переменные из кеша
-        } else {
-
-            $filter = array(
-                "CURRENCY" => $currency,
-                "DATE_RATE"=> $date->format('d.m.Y')
-            );
-            $by     = "date";
-            $order  = "desc";
-
-            $db_rate = \CCurrencyRates::GetList($by, $order, $filter);
-            $vars = array(
-                'result' => $db_rate->Fetch()
-            );
-
-            $cache->set($cacheId, $vars);
-        }
-
-        return $vars['result'];
+        return CurrencyRateTable::getRow($query);
     }
 
     /**
@@ -155,7 +139,6 @@ class CurrencyRate
      * @param      $curCode
      * @param Date $date
      * @return bool
-     * @throws \Bitrix\Main\SystemException
      * @author Pavel Shulaev (https://rover-it.me)
      */
     public static function isExists($curCode, Date $date)
