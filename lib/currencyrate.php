@@ -14,6 +14,7 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\SystemException;
 use Bitrix\Main\Type\Date;
 use Bitrix\Currency\CurrencyTable;
+use Bitrix\Currency\CurrencyManager;
 /**
  * Class CurrencyRate
  *
@@ -34,7 +35,7 @@ class CurrencyRate
         $query = array(
             'select'    => array('CURRENCY'),
             'filter'    => array('BASE' => 'N'),
-            'cache'     => array('ttl' => 3600)
+            'cache'     => array('ttl' => 60)
         );
 
         $currencies = CurrencyTable::getList($query);
@@ -159,6 +160,9 @@ class CurrencyRate
      */
     public static function convert($sum, $currency, Date $date)
     {
+        if ($currency == CurrencyManager::getBaseCurrency())
+            return $sum;
+
         $rate = self::get($currency, $date);
 
         if (!$rate)

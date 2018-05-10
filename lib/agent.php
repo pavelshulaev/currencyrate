@@ -32,7 +32,6 @@ class Agent
         if (!\CAgent::AddAgent(self::getName(), 'rover.currencyrate', 'Y', 86400, '', 'Y', $nextExec->format('d.m.Y H:i:s')))
         {
             global $APPLICATION;
-            pr($APPLICATION->GetException()->GetString()); die();
             throw new SystemException($APPLICATION->GetException()->GetString());
         }
     }
